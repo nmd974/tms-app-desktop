@@ -23,7 +23,7 @@ L.Marker.prototype.options.icon = iconDefault;
 })
 export class MapComponent implements AfterViewInit {
   private map: any;
-
+  markers : any = []
   private initMap(): void {
     this.map = L.map('map', {
       center: [ -21.114063, 55.4998053 ],
@@ -36,17 +36,24 @@ export class MapComponent implements AfterViewInit {
     });
 
     tiles.addTo(this.map);
-    var marker = L.marker([-20.8870337, 55.41395]).addTo(this.map);
-    marker.bindPopup("HELLO");
+
+    // marker.bindPopup("HELLO");
+
+    // var marker = L.marker([-20.8870337, 55.41395], {icon: myIcon}).addTo(this.map);
   }
   constructor(private WebsocketService: MarkerService) { }
 
   ngAfterViewInit(): void {
     this.initMap();
-    this.WebsocketService.geolocations.subscribe((data: GeolocationData) => {
+    this.WebsocketService.geolocations.subscribe(async (data: GeolocationData) => {
       // this.received.push(msg);
       console.log("Response from websocket: " + data);
-      L.marker([data.latitude, data.longitude]).addTo(this.map);
+      const iconUrl = await this.WebsocketService.generateIcon(data);
+      const myIcon: any = L.icon({
+        iconUrl: iconUrl,
+        iconSize: [44, 44]
+      });
+      L.marker([data.latitude, data.longitude], {icon: myIcon}).addTo(this.map);
     });
   }
 
@@ -57,6 +64,10 @@ export class MapComponent implements AfterViewInit {
     //   // this.received.push(msg);
     //   console.log("Response from websocket: " + msg);
     // });
+  }
+
+  async generateIcon(data: any){
+
   }
 
 }
